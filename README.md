@@ -28,7 +28,7 @@ Der Internet Creator wird folgendermaßen aufgerufen:
 
 source .venv/bin/activate
 
-cd streams
+cd inc
 
 python inc.py
 
