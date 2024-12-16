@@ -1,0 +1,161 @@
+---
+- name: Remove old Vyos images from routers
+  gather_facts: false
+  connection: ansible.netcommon.network_cli
+  vars:
+    ansible_user: vyos
+    ansible_network_os: vyos.vyos.vyos
+
+  hosts: router
+  tasks:
+
+    - name: Get a list of system images from router
+      vyos.vyos.vyos_command:
+        commands:
+          - show system image
+      register: images
+      run_once: true
+
+    - name: Ensure stdout_lines is not empty
+      ansible.builtin.fail:
+        msg: "stdout_lines is empty, no images found."
+      when: images.stdout_lines | length == 0
+      run_once: true
+
+    - name: Parse stdout_lines and add all images that are NOT in use to to_delete variable
+      ansible.builtin.set_fact:
+        to_delete: "{{ to_delete | default([]) + [item.split()[0]] }}"
+      loop: "{{ images.stdout_lines[0][2:] }}"  # Skip the header lines
+      when: "'Yes' not in item"
+      run_once: true
+
+    - name: Delete all unused system images from router
+      ansible.netcommon.cli_command:
+        command: delete system image {{ item }}
+        newline: true
+        check_all: true
+        prompt:
+          - 'Do you really want to delete the image'
+        answer:
+          - 'y'
+      loop: "{{ to_delete }}"
+      when: to_delete is defined and to_delete | length > 0
+
+
+
+
+## Erklärung des folgenden Tasks:
+
+# - name: Parse stdout_lines and add all images that are NOT in use to to_delete variable
+#   ansible.builtin.set_fact:
+#     to_delete: "{{ to_delete | default([]) + [item.split()[0]] }}"
+#   loop: "{{ images.stdout_lines[0][2:] }}"  # Skip the header lines
+#   when: "'Yes' not in item"
+
+
+# Modul: ansible.builtin.set_fact:
+# Das Modul set_fact wird verwendet, um Variablen während der Laufzeit des Playbooks zu definieren oder zu aktualisieren. Hier wird eine Variable namens to_delete gesetzt oder aktualisiert.
+
+# to_delete: "{{ to_delete | default([]) + [item.split()[0]] }}"
+
+# Die Zeile fügt den ersten Eintrag (den Image-Namen) der aktuellen Zeile (item) der Liste to_delete hinzu
+
+#     • to_delete | default([]):
+#         ◦ Dies sorgt dafür, dass, wenn to_delete noch nicht existiert, ein leerer Standardwert ([]) verwendet wird.
+#         ◦ Dadurch wird sichergestellt, dass ein Fehler vermieden wird, falls die Variable nicht vorher definiert wurde.
+#     • [item.split()[0]]:
+#         ◦ item repräsentiert eine Zeile aus der Ausgabe (stdout_lines) des vorherigen Tasks.
+#         ◦ item.split() teilt die Zeile in eine Liste von Wörtern basierend auf Leerzeichen.
+#         ◦ item.split()[0] extrahiert das erste Wort der Zeile (das ist der Image-Name).
+#         ◦ Das Ergebnis wird als Liste mit nur einem Element dargestellt: [item.split()[0]].
+#     • +:
+#         ◦ Der +-Operator fügt die extrahierten Image-Namen der bestehenden to_delete-Liste hinzu.
+
+
+# loop: "{{ images.stdout_lines[0][2:] }}"
+
+#     • images.stdout_lines[0]:
+#         ◦ Die Ausgabe (stdout_lines) des Befehls show system image enthält mehrere Zeilen, die in Listenform organisiert sind.
+#         ◦ stdout_lines[0] greift auf den ersten Eintrag zu, der üblicherweise die vollständige Ausgabe darstellt.
+#     • [2:]:
+#         ◦ [2:] schneidet die ersten beiden Zeilen ab. Das ist notwendig, weil diese Zeilen Kopfzeilen sind.
+#         ◦ Die Schleife iteriert über die verbleibenden Zeilen.
+# Das Ergebnis ist, dass jede verbleibende Zeile der Ausgabe der Schleife (loop) zugeführt wird.
+
+
+# when: "'Yes' not in item"
+
+# Funktion:
+#     • Die Bedingung prüft, ob der String 'Yes' nicht in der Zeile (item) vorkommt.
+#     • Die Ausgabe von show system image enthält einen Hinweis darauf, ob ein Image verwendet wird. Das Wort 'Yes' zeigt an, dass das Image aktuell in Benutzung ist.
+#     • Durch diese Bedingung werden nur Zeilen gelöscht, in denen 'Yes' nicht vorkommt – also die Images, die nicht in Verwendung sind.
+
+
+
+## Explanation of the task:
+
+# - name: Parse stdout_lines and add all images that are NOT in use to to_delete variable
+#   ansible.builtin.set_fact:
+#     to_delete: "{{ to_delete | default([]) + [item.split()[0]] }}"
+#   loop: "{{ images.stdout_lines[0][2:] }}"  # Skip the header lines
+#   when: "'Yes' not in item"
+
+
+# Module: ansible.builtin.set_fact
+# The set_fact module is used to define or update variables during the runtime of the playbook. Here, a variable named to_delete is being set or updated.
+
+# to_delete: "{{ to_delete | default([]) + [item.split()[0]] }}"
+
+#     • to_delete | default([]):
+#         ◦ This ensures that if the to_delete variable does not already exist, it defaults to an empty list ([]).
+#         ◦ This avoids errors if the variable is undefined at the start.
+#     • [item.split()[0]]:
+#         ◦ item represents a line from the output (stdout_lines) of the previous task.
+#         ◦ item.split() splits the line into a list of words based on spaces.
+#         ◦ item.split()[0] extracts the first word of the line (which is assumed to be the image name).
+#         ◦ The result is represented as a list containing a single element: [item.split()[0]].
+#     • +:
+#         ◦ The + operator appends the extracted image name to the existing to_delete list.
+
+# In summary: This line appends the first entry (the image name) from the current line (item) to the to_delete list. If to_delete doesn’t exist yet, it is initialized as an empty list.
+
+
+# Loop: loop
+
+# loop: "{{ images.stdout_lines[0][2:] }}"
+
+#     • images.stdout_lines[0]:
+#         ◦ The output (stdout_lines) of the show system image command contains multiple lines, stored as a list.
+#         ◦ stdout_lines[0] retrieves the first element, which typically contains the full output.
+#     • [2:]:
+#         ◦ [2:] skips the first two lines. This necessary because these lines contain headers.
+#         ◦ The loop iterates over the remaining lines.
+# The result is, that each remaining line from the command output is processed in the loop.
+
+
+# Condition: when
+
+# when: "'Yes' not in item"
+
+#     • This condition checks whether the string 'Yes' is not present in the line (item).
+#     • The output of show system image includes an indicator of whether an image is currently in use. The word 'Yes' indicates, that the image is in use.
+#     • This condition ensures that only lines where 'Yes' is not present are processed – i.e., the images that are not in use.
+
+
+# Summary:
+
+# The combined code block:
+
+# ansible.builtin.set_fact:
+#   to_delete: "{{ to_delete | default([]) + [item.split()[0]] }}"
+# loop: "{{ images.stdout_lines[0][2:] }}"
+# when: "'Yes' not in item"
+
+# performs the following steps:
+#     1. Takes the lines from the output (images.stdout_lines[0]), starting from the third line ([2:]), and iterates over them.
+#     2. Ignores any line that contains the word 'Yes', as such images are in use.
+#     3. Extracts the first word of each relevant line (item.split()[0]), which represents the image name.
+#     4. Adds this image name to the to_delete list.
+
+# Outcome:
+# After this task, the to_delete variable contains a list of all images that are not in use and can potentially be deleted. This list is then used in the subsequent task (Delete all unused system images from router).

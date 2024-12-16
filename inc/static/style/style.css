@@ -1,0 +1,398 @@
+/* Allgemeine Stile */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1e272e;
+  margin: 0;
+  padding: 0;
+  color: #b0bec5;
+}
+
+/* Header */
+header {
+  background-color: #1e272e;
+  color: #b0bec5;
+  text-align: center;
+  padding: 15px 0;
+}
+
+header h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+/* Logo */
+.logo-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 97px; /* Größe ändern */
+  height: auto;
+  z-index: 10; /* Logo ganz oben */
+}
+
+.logo-container img {
+  width: 100%;
+  height: auto;
+}
+
+/* Navigation */
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  background-color: #2d3e50;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+nav ul li {
+  margin: 0;
+}
+
+nav ul li a {
+  display: block;
+  padding: 12px 20px;
+  color: #b0bec5;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+nav ul li a:hover {
+  background-color: #3a4b63;
+}
+
+/* Zentrale Bildausrichtung */
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+  margin-top: 46px;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Toggle */
+.toggle-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+}
+.toggle-label {
+  color: #ddd;
+  margin-right: 8px;
+}
+.toggle-switch {
+  position: relative;
+  width: 60px;
+  height: 30px;
+}
+.toggle-checkbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 30px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+.toggle-checkbox:checked + .slider {
+  background-color: #2196F3;
+}
+.toggle-checkbox:checked + .slider:before {
+  transform: translateX(30px);
+}
+
+/* Benachrichtigungen */
+.notification {
+  position: fixed;
+  top: 4px;
+  right: 20px;
+  padding: 15px;
+  background-color: #333;
+  color: #fff;
+  font-size: 18px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  opacity: 0;  /* Startet unsichtbar */
+  transition: opacity 0.5s ease;  /* Sanfte Ausblendung */
+}
+
+.notification.show {
+  opacity: 1;  /* Wird sichtbar */
+}
+
+.notification.success {
+  background-color: #5e786f;
+  color: #000;
+}
+
+.notification.error {
+  background-color: #ae4a4a;
+  color: #000;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 30px auto;
+}
+
+.site-titel {
+  text-align: center;
+}
+
+.gen-titel {
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #ddd;
+  /* color: #b0bec5; */
+  padding-bottom: 12px;
+}
+
+/* Formularcontainer */
+.form-container,
+.form-container-out,
+.form-container-gen {
+  width: 260px;
+  margin: 25px auto;
+  background-color: #232e34;
+  padding: 20px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  border: 1px solid #111;
+}
+
+.form-container-out {
+  margin: 0 auto 30px;
+}
+
+.form-container-gen {
+  padding: 0px 20px 20px 20px;
+  margin-top: 15px;
+  margin-bottom: 50px;
+}
+
+.form-container label,
+.form-container-out label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #ccc;
+}
+
+/* Eingabefelder */
+.form-container input[type="text"],
+.form-container input[type="number"],
+.form-container select,
+.form-container-out input[type="text"],
+.form-container-out input[type="number"],
+.form-container-out select,
+.form-container-gen input[type="text"],
+.form-container-gen input[type="number"],
+.form-container-gen select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #424242;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 18px;
+  background-color: #2c343c;
+  color: #b0bec5;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-container input[type="text"]:hover,
+.form-container input[type="number"]:hover,
+.form-container select:hover,
+.form-container-out input[type="text"]:hover,
+.form-container-out input[type="number"]:hover,
+.form-container-out select:hover,
+.form-container-gen input[type="text"]:hover,
+.form-container-gen input[type="number"]:hover,
+.form-container-gen select:hover {
+  border-color: #607d8b;
+  box-shadow: 0 0 5px rgba(33, 150, 243, 0.4), inset 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.form-container input[type="text"]:focus,
+.form-container input[type="number"]:focus,
+.form-container select:focus,
+.form-container-out input[type="text"]:focus,
+.form-container-out input[type="number"]:focus,
+.form-container-out select:focus,
+.form-container-gen input[type="text"]:focus,
+.form-container-gen input[type="number"]:focus,
+.form-container-gen select:focus {
+  border-color: #80cbc4;
+  box-shadow: 0 0 8px rgba(33, 150, 243, 0.7), inset 1px 1px 6px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
+
+.form-container input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.router-fields {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px; /* Abstand zwischen den Eingabefeldern */
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-bottom: 4px; /* Abstand zwischen Label und Eingabefeld */
+}
+
+/* Button */
+.form-container button,
+.form-container-out button,
+.form-container-gen button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #37474f;
+  color: #ddd;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.form-container-out button {
+  margin-top: 23px;
+}
+
+.form-container-gen button {
+  margin-top: 37px;
+  padding: 10px;
+}
+
+.form-container button:hover,
+.form-container-out button:hover,
+.form-container-gen button:hover {
+  background-color: #607d8b;
+}
+
+/* Aktivierter Zustand */
+.form-container button:active,
+.form-container-out button:active,
+.form-container-gen button:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: translateY(2px);  /* Button wirkt gedrückt */
+}
+
+/* Checkbox Label */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #b0bec5;
+  margin-top: 3px;
+  padding-top: 5px;
+  padding-bottom: 3px;
+}
+
+/* Wrapper Ping und Infos */
+.wrapper2 {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  justify-content: right;
+  margin-right: 105px;
+  margin-left: 860px;
+}
+
+/* Feld für spezielle Eingaben */
+#field {
+  margin-left: 110px;
+  padding-left: 30px;
+  color: #ddd;
+  background-color: #2c343c;
+  border-radius: 4px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Ausgabeformatierung */
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: medium;
+  line-height: 0.8;
+}
+
+#output {
+  max-height: 440px;
+  width: 720px;
+  overflow-y: auto;
+}
+
+.wrapper-gen {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+/* Formularcontainer General */
+.form-container-gen label,
+.form-container-gen input,
+.form-container-gen button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.form-container-gen button {
+  font-weight: normal;
+}
+
+/* Footer */
+footer {
+  background-color: #2d3e50;
+  color: #e0e0e0;
+  text-align: center;
+  padding: 10px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+footer p {
+  margin: 0;
+  font-size: 12px;
+}
+

@@ -1,0 +1,19 @@
+---
+- name: Show remaining image
+  gather_facts: false
+  connection: ansible.netcommon.network_cli
+  vars:
+    ansible_user: vyos
+    ansible_network_os: vyos.vyos.vyos
+
+  hosts: router
+  tasks:
+    - name: Get a list of system images from router
+      vyos.vyos.vyos_command:
+        commands:
+          - show system image
+      register: images
+
+    - name: Debug stdout_lines
+      ansible.builtin.debug:
+        msg: "{{ images.stdout_lines }}"

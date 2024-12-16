@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Router Informations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='style/icon.png') }}" type="image/png">
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+  </head>
+  <body>
+    
+    <header>
+      <h1>Internet Creator v0.10</h1>
+    </header>
+
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='style/logo.svg') }}" alt="Logo">
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Topology</a></li>
+        <li><a href="{{ url_for('setup') }}">Setup</a></li>
+        <li><a href="{{ url_for('creator') }}">Creator</a></li>
+        <li><a href="{{ url_for('ping_test') }}">Ping Test</a></li>
+        <li><a href="{{ url_for('show_infos') }}">Router Infos</a></li>
+        <li><a href="{{ url_for('backup_restore') }}">Backup/Restore</a></li>
+        <li><a href="{{ url_for('upgrade') }}">Upgrade</a></li>
+        <li><a href="{{ url_for('general') }}">General</a></li>
+      </ul>
+    </nav>
+    
+    <h2 class="site-titel">Router Informations</h2>
+    
+    <div class="wrapper2">
+    <main>
+      <form method="post" class="form-container-out">
+          <label for="Provider">Provider:</label>
+          <input type="text" name="Provider" value="{{ config.get('Provider', '') }}"><br>
+          
+          <label for="Router">Router:</label>
+          <input type="text" name="Router" value="{{ config.get('Router', '') }}"><br>
+
+          <button type="submit">Show Infos</button>
+      </form>
+    </main>
+    
+    <section id="field">
+      <h3 style="word-spacing: 20px;">Configuration Routes Rules ARP IPs Interfaces VRF</h3>
+      <pre id="output"></pre>
+    </section>
+
+    <script type="text/javascript">
+      const socket = io.connect();
+
+      socket.on('show_infos_output', function(msg) {
+        // Neue Zeile zur Ausgabe hinzufügen
+        const outputElement = document.getElementById('output');
+        outputElement.innerText += msg.data + '\n';
+
+        // Automatisch nach unten scrollen
+        outputElement.scrollTop = outputElement.scrollHeight;
+      });
+    </script>
+    </div>
+
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+
+    <script>
+      function shownotification(message, category) {
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+    
+        notificationMessage.textContent = message;
+        notification.className = `notification show ${category}`;
+    
+        notification.style.display = 'flex';
+    
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            notification.style.display = 'none';
+          }, 500);
+        }, 7000);
+      }
+    
+      document.addEventListener('DOMContentLoaded', () => {
+        const messages = JSON.parse('{{ get_flashed_messages(with_categories=true) | tojson | safe }}');
+    
+        if (messages.length > 0) {
+          messages.forEach(([category, message]) => {
+            shownotification(message, category);
+          });
+        } else {
+          document.getElementById('notification').style.display = 'none';
+        }
+      });
+    </script>
+
+    <footer>
+      <p></p>
+    </footer>
+  </body>
+</html> 

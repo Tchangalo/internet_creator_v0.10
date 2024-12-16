@@ -1,0 +1,215 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Backup/Restore</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='style/icon.png') }}" type="image/png">
+  </head>
+  <body>
+
+    <header>
+      <h1>Internet Creator v0.10</h1>
+    </header>
+
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='style/logo.svg') }}" alt="Logo">
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Topology</a></li>
+        <li><a href="{{ url_for('setup') }}">Setup</a></li>
+        <li><a href="{{ url_for('creator') }}">Creator</a></li>
+        <li><a href="{{ url_for('ping_test') }}">Ping Test</a></li>
+        <li><a href="{{ url_for('show_infos') }}">Router Infos</a></li>
+        <li><a href="{{ url_for('backup_restore') }}">Backup/Restore</a></li>
+        <li><a href="{{ url_for('upgrade') }}">Upgrade</a></li>
+        <li><a href="{{ url_for('general') }}">General</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="wrapper">
+        {% for action, title, fields, button_text in [
+          ('backup', 'Backup Routers', 
+            [{'name': 'Provider', 'label': 'Provider:', 'type': 'text', 'default': ''},
+              {'group': 'router-fields', 'fields': [
+                {'name': 'First Router', 'label': 'First Router:', 'type': 'text', 'default': ''},
+                {'name': 'Last Router', 'label': 'Last Router:', 'type': 'text', 'default': ''}
+              ]},
+              {'name': 'delete_all', 'label': 'Delete ALL existing Backups', 'type': 'checkbox', 'default': False}], 
+            'Backup'),
+          ('backup_id', 'Backup VM by ID', 
+            [{'name': 'vmid', 'label': 'VM ID:', 'type': 'text', 'default': ''},
+              {'name': 'delete_all', 'label': 'Delete ALL existing Backups', 'type': 'checkbox', 'default': False}], 
+            'Backup VM'),
+          ('restore', 'Restore Routers', 
+            [{'name': 'Provider', 'label': 'Provider:', 'type': 'text', 'default': ''},
+              {'group': 'router-fields', 'fields': [
+                {'name': 'First Router', 'label': 'First Router:', 'type': 'text', 'default': ''},
+                {'name': 'Last Router', 'label': 'Last Router:', 'type': 'text', 'default': ''}
+              ]},
+              {'name': 'Start Delay', 'label': 'Start Delay:', 'type': 'text', 'default': ''}], 
+            'Restore'),
+          ('restore_id', 'Restore VM by ID', 
+            [{'name': 'vmid', 'label': 'VM ID:', 'type': 'text', 'default': ''}], 
+            'Restore VM')
+        ] %}
+        <div>
+          <h2 class="site-titel">{{ title }}</h2>
+          <form method="post" class="form-container">
+            {% for field in fields %}
+              {% if field.group %}
+                <div class="{{ field.group }}">
+                  {% for subfield in field.fields %}
+                    <div class="input-group">
+                      <label for="{{ subfield.name }}">{{ subfield.label }}</label>
+                      <input type="text" name="{{ subfield.name }}" value="{{ config.get(subfield.name, subfield.default) }}">
+                    </div>
+                  {% endfor %}
+                </div>
+              {% elif field.type == 'text' %}
+                <label for="{{ field.name }}">{{ field.label }}</label>
+                <input type="text" name="{{ field.name }}" value="{{ config.get(field.name, field.default) }}">
+              {% elif field.type == 'checkbox' %}
+                <div class="checkbox-label">
+                  <input type="checkbox" name="{{ field.name }}" {% if config.get(field.name, field.default) %} checked {% endif %}>
+                  <label for="{{ field.name }}">{{ field.label }}</label>
+                </div>
+              {% endif %}
+            {% endfor %}
+            <button type="submit" name="{{ action }}">{{ button_text }}</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </main>    
+
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+
+    <script>
+      function shownotification(message, category) {
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+    
+        notificationMessage.textContent = message;
+        notification.className = `notification show ${category}`;
+    
+        notification.style.display = 'flex';
+    
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            notification.style.display = 'none';
+          }, 500);
+        }, 7000);
+      }
+    
+      document.addEventListener('DOMContentLoaded', () => {
+        const messages = JSON.parse('{{ get_flashed_messages(with_categories=true) | tojson | safe }}');
+    
+        if (messages.length > 0) {
+          messages.forEach(([category, message]) => {
+            shownotification(message, category);
+          });
+        } else {
+          document.getElementById('notification').style.display = 'none';
+        }
+      });
+    </script>
+        
+    <footer>
+      <p></p>
+    </footer>
+  </body>
+</html>
+
+
+
+
+
+
+<!-- <main>
+      <div class="wrapper">
+        <div>
+          <h2 class="site-titel">Backup Routers</h2>
+          <form method="post" class="form-container">             
+              <label for="Provider">Provider:</label>
+              <input type="text" name="Provider" value="{{ config.get('Provider', '') }}">
+              
+              <div class="router-fields">
+                <div class="input-group">
+                  <label for="First Router">First Router:</label>
+                  <input type="text" name="First Router" value="{{ config.get('First Router', '') }}">
+                </div>
+      
+                <div class="input-group">
+                  <label for="Last Router">Last Router:</label>
+                  <input type="text" name="Last Router" value="{{ config.get('Last Router', '') }}">
+                </div>
+              </div>
+
+              <div class="checkbox-label">
+                  <input type="checkbox" name="delete_all" {% if config.get('delete_all', False) %} checked {% endif %}>
+                  <label for="delete_all">Delete ALL existing Backups</label>
+              </div>
+
+              <button type="submit" name="backup">Backup</button>
+          </form>
+        </div> 
+
+        <div>
+          <h2 class="site-titel">Backup VM by ID</h2>
+          <form method="post" class="form-container">             
+              <label for="vmid">VM ID:</label>
+              <input type="text" name="vmid" value="{{ config.get('vmid', '') }}">
+              
+              <div class="checkbox-label">
+                  <input type="checkbox" name="delete_all" {% if config.get('delete_all', False) %} checked {% endif %}>
+                  <label for="delete_all">Delete ALL existing Backups</label>
+              </div>
+
+              <button type="submit" name="backup_id">Backup VM</button>
+          </form>
+        </div> 
+        
+        <div>
+          <h2 class="site-titel">Restore Routers</h2>
+          <form method="post" class="form-container">            
+              <label for="Provider">Provider:</label>
+              <input type="text" name="Provider" value="{{ config.get('Provider', '') }}">
+              
+              <div class="router-fields">
+                <div class="input-group">
+                  <label for="First Router">First Router:</label>
+                  <input type="text" name="First Router" value="{{ config.get('First Router', '') }}">
+                </div>
+      
+                <div class="input-group">
+                  <label for="Last Router">Last Router:</label>
+                  <input type="text" name="Last Router" value="{{ config.get('Last Router', '') }}">
+                </div>
+              </div>
+
+              <label for="Start Delay">Start Delay:</label>
+              <input type="text" name="Start Delay" value="{{ config.get('Start Delay', '') }}">
+
+              <button type="submit" name="restore">Restore</button>
+          </form>
+        </div>
+            
+        <div>
+          <h2 class="site-titel">Restore VM by ID</h2>
+          <form method="post" class="form-container">            
+              <label for="vmid">VM ID:</label>
+              <input type="text" name="vmid" value="{{ config.get('vmid', '') }}">
+              
+              <button type="submit" name="restore_id">Restore VM</button>
+          </form>
+        </div>  
+      </div>
+    </main> -->

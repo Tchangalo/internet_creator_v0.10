@@ -1,0 +1,118 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Upgrade</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='style/icon.png') }}" type="image/png">
+  </head>
+  <body>
+    <header>
+      <h1>Internet Creator v0.10</h1>
+    </header>
+
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='style/logo.svg') }}" alt="Logo">
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Topology</a></li>
+        <li><a href="{{ url_for('setup') }}">Setup</a></li>
+        <li><a href="{{ url_for('creator') }}">Creator</a></li>
+        <li><a href="{{ url_for('ping_test') }}">Ping Test</a></li>
+        <li><a href="{{ url_for('show_infos') }}">Router Infos</a></li>
+        <li><a href="{{ url_for('backup_restore') }}">Backup/Restore</a></li>
+        <li><a href="{{ url_for('upgrade') }}">Upgrade</a></li>
+        <li><a href="{{ url_for('general') }}">General</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="wrapper">
+          {% for action, title, button_text, include_start_delay, include_serial_mode in [
+              ('upgrade', 'Upgrade Vyos Routers', 'Upgrade', True, True),
+              ('upgrade_fast', 'Upgrade Vyos Routers Fast', 'Upgrade Fast', False, False)
+          ] %}
+          <div>
+              <h2 class="site-titel">{{ title }}</h2>
+              <form method="post" class="form-container">
+                  <label for="Provider">Provider:</label>
+                  <input type="text" name="Provider" value="{{ config.get('Provider', '') }}">
+  
+                  <div class="router-fields">
+                      <div class="input-group">
+                          <label for="First Router">First Router:</label>
+                          <input type="text" name="First Router" value="{{ config.get('First Router', '') }}">
+                      </div>
+  
+                      <div class="input-group">
+                          <label for="Last Router">Last Router:</label>
+                          <input type="text" name="Last Router" value="{{ config.get('Last Router', '') }}">
+                      </div>
+                  </div>
+  
+                  {% if include_start_delay %}
+                  <div>
+                      <label for="Start Delay">Start Delay:</label>
+                      <input type="text" name="Start Delay" value="{{ config.get('Start Delay', '') }}">
+                  </div>
+                  {% endif %}
+  
+                  {% if include_serial_mode %}
+                  <div class="checkbox-label">
+                      <input type="checkbox" name="Serial Mode" {% if config.get('Serial Mode', False) %} checked {% endif %}>
+                      <label for="Serial Mode">Serial Mode</label>
+                  </div>
+                  {% endif %}
+  
+                  <button type="submit" name="{{ action }}">{{ button_text }}</button>
+              </form>
+          </div>
+          {% endfor %}
+      </div>
+    </main>
+
+
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+
+    <script>
+      function shownotification(message, category) {
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+    
+        notificationMessage.textContent = message;
+        notification.className = `notification show ${category}`;
+    
+        notification.style.display = 'flex';
+    
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            notification.style.display = 'none';
+          }, 500);
+        }, 7000);
+      }
+    
+      document.addEventListener('DOMContentLoaded', () => {
+        const messages = JSON.parse('{{ get_flashed_messages(with_categories=true) | tojson | safe }}');
+    
+        if (messages.length > 0) {
+          messages.forEach(([category, message]) => {
+            shownotification(message, category);
+          });
+        } else {
+          document.getElementById('notification').style.display = 'none';
+        }
+      });
+    </script>
+        
+    <footer>
+      <p></p>
+    </footer>
+  </body>
+</html>
+

@@ -1,0 +1,75 @@
+---
+- name: Get latest VyOS ISO and deploy on routers for upgrading.
+  gather_facts: false
+  connection: ansible.netcommon.network_cli
+  vars:
+    vyos_dir: "vyos-images/"
+    ansible_user: vyos
+    ansible_password: vyos
+    ansible_network_os: vyos.vyos.vyos
+
+  hosts: router
+  tasks:
+
+    - name: Get latest VyOS ISO URL
+      ansible.builtin.uri:
+        url: https://raw.githubusercontent.com/vyos/vyos-nightly-build/refs/heads/current/version.json
+        method: GET
+        return_content: true
+        status_code: 200
+        body_format: json
+      register: data
+      run_once: true
+
+    - name: Extract the ISO URL from content
+      ansible.builtin.set_fact:
+        iso_url: "{{ (data.content | from_json)[0].url }}"
+      run_once: true
+
+    ## If you want see the latest version, that was found, remove the comments here:
+    # - name: Debug iso_url
+    #   ansible.builtin.debug:
+    #     var: iso_url
+
+    - name: Set fact iso_name from url
+      ansible.builtin.set_fact:
+        iso_name: "{{ iso_url.split('/')[-1] }}"
+      run_once: true
+
+    - name: Check if the image already exists
+      ansible.builtin.stat:
+        path: "vyos-images/{{ iso_name }}"
+      register: image_stat
+      run_once: true
+
+    - name: Download ISO if it does not exist
+      ansible.builtin.get_url:
+        url: "{{ iso_url }}"
+        dest: "vyos-images/{{ iso_name }}"
+        mode: '0644'
+      when: not image_stat.stat.exists
+      run_once: true
+
+    - name: "Copying {{ iso_name }} to system via scp"
+      shell: "scp {{ vyos_dir }}{{ iso_name }} {{ ansible_user }}@{{ ansible_host }}:/home/{{ ansible_user }}/{{ iso_name }} ; sleep 2"
+      delegate_to: localhost
+      become: no
+      vars:
+        ansible_ssh_pass: "{{ ansible_password }}"
+
+    - name: Installing latest vyos on system
+      ansible.netcommon.cli_command:
+        command: add system image "{{ iso_name }}"
+        newline: true
+        check_all: true
+        prompt:
+          - 'What would you like to name this image'
+          - 'Would you like to set the new image as the default one for boot'
+          - 'An active configuration was found'
+          - 'Would you like to copy SSH host keys'
+        answer:
+          - ''
+          - 'y'
+          - 'y'
+          - 'y'
+

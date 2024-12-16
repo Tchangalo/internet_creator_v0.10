@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Topology</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='style/icon.png') }}" type="image/png">
+</head>
+<body>
+
+    <header>
+        <h1>Internet Creator v0.10</h1>
+    </header>
+
+    <div class="logo-container">
+    <img src="{{ url_for('static', filename='style/logo.svg') }}">
+    </div>
+
+    <div class="toggle-container">
+        <label class="toggle-label">Change Color Scheme</label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="mode-toggle" class="toggle-checkbox">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <script>
+        document.getElementById("mode-toggle").addEventListener("change", function() {
+            const mode = this.checked ? "on" : "off";
+            fetch("/toggle_mode", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ mode: mode })
+            }).catch(error => console.error("Error updating toggle mode:", error));
+        });
+    </script>
+
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('index') }}">Topology</a></li>
+            <li><a href="{{ url_for('setup') }}">Setup</a></li>
+            <li><a href="{{ url_for('creator') }}">Creator</a></li>
+            <li><a href="{{ url_for('ping_test') }}">Ping Test</a></li>
+            <li><a href="{{ url_for('show_infos') }}">Router Infos</a></li>
+            <li><a href="{{ url_for('backup_restore') }}">Backup/Restore</a></li>
+            <li><a href="{{ url_for('upgrade') }}">Upgrade</a></li>
+            <li><a href="{{ url_for('general') }}">General</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="image-container">
+            <img src="{{ url_for('static', filename='style/topology.svg') }}">
+        </div>
+    </main>
+
+    <footer>
+        <p></p>
+    </footer>
+
+</body>
+</html>

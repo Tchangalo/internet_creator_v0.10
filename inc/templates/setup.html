@@ -1,0 +1,138 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Setup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='style/icon.png') }}" type="image/png">
+  </head>
+  <body>
+
+    <header>
+      <h1>Internet Creator v0.10</h1>
+    </header>
+
+    <div class="logo-container">
+      <img src="{{ url_for('static', filename='style/logo.svg') }}" alt="Logo">
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}">Topology</a></li>
+        <li><a href="{{ url_for('setup') }}">Setup</a></li>
+        <li><a href="{{ url_for('creator') }}">Creator</a></li>
+        <li><a href="{{ url_for('ping_test') }}">Ping Test</a></li>
+        <li><a href="{{ url_for('show_infos') }}">Router Infos</a></li>
+        <li><a href="{{ url_for('backup_restore') }}">Backup/Restore</a></li>
+        <li><a href="{{ url_for('upgrade') }}">Upgrade</a></li>
+        <li><a href="{{ url_for('general') }}">General</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <div class="wrapper">
+          {% for form_data in [
+              {
+                  'action': 'create_vyos_qcow2',
+                  'title': 'Create Vyos Cloud Init Image',
+                  'button_text': 'Create Image',
+                  'fields': [
+                      {'label': 'VM (DHCP Server) Username', 'name': 'VM Username'},
+                      {'label': 'VM (DHCP Server) IP', 'name': 'VM IP'},
+                      {'label': 'PVE IP', 'name': 'PVE IP'},
+                      {'label': 'Vyos Version No (e.g. 1.5.0)', 'name': 'Version No'}
+                  ]
+              },
+              {
+                  'action': 'create_seed',
+                  'title': 'Create Seed',
+                  'button_text': 'Create Seed',
+              }
+          ] %}
+          <div>
+              <h2 class="site-titel">{{ form_data.title }}</h2>
+              <form method="post" class="form-container">
+                  {% for field in form_data.fields %}
+                  <label for="{{ field.name }}">{{ field.label }}:</label>
+                  <input type="text" name="{{ field.name }}" value="{{ config.get(field.name, '') }}">
+                  {% endfor %}
+                  <button type="submit" name="{{ form_data.action }}">{{ form_data.button_text }}</button>
+              </form>
+          </div>
+          {% endfor %}
+      </div>
+    </main>
+  
+
+    <div id="notification" class="notification">
+      <span id="notification-message"></span>
+    </div>
+
+    <script>
+      function shownotification(message, category) {
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+    
+        notificationMessage.textContent = message;
+        notification.className = `notification show ${category}`;
+    
+        notification.style.display = 'flex';
+    
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            notification.style.display = 'none';
+          }, 500);
+        }, 7000);
+      }
+    
+      document.addEventListener('DOMContentLoaded', () => {
+        const messages = JSON.parse('{{ get_flashed_messages(with_categories=true) | tojson | safe }}');
+    
+        if (messages.length > 0) {
+          messages.forEach(([category, message]) => {
+            shownotification(message, category);
+          });
+        } else {
+          document.getElementById('notification').style.display = 'none';
+        }
+      });
+    </script>
+
+    <footer>
+      <p></p>
+    </footer>
+  </body>
+</html>
+
+
+
+
+
+
+<!-- <main>
+      <div class="wrapper">
+        <div>
+          <h2 class="site-titel">Create Vyos Cloud Init Image</h2>
+          <form method="post" class="form-container">
+            <label for="VM Username">VM Username:</label>
+            <input type="text" name="VM Username" value="{{ config.get('VM Username', '') }}">
+            
+            <label for="VM IP">VM IP:</label>
+            <input type="text" name="VM IP" value="{{ config.get('VM IP', '') }}">
+            
+            <label for="PVE IP">PVE IP:</label>
+            <input type="text" name="PVE IP" value="{{ config.get('PVE IP', '') }}">
+
+            <button type="submit" name="create_vyos_qcow2">Create Image</button>
+          </form>
+        </div> 
+
+        <div>
+          <h2 class="site-titel">Create Seed</h2>
+          <form method="post" class="form-container">            
+            <button type="submit" name="create_seed">Create Seed</button>
+          </form>
+        </div>
+    </main> -->
